@@ -1,0 +1,39 @@
+
+name: Build Pixel Snapper WASM
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Compile WebAssembly
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Pixel Snapper source
+        uses: actions/checkout@v4
+        with:
+          repository: Hugo-Dz/spritefusion-pixel-snapper
+          ref: main
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack --locked
+
+      - name: Build WebAssembly package
+        run: wasm-pack build --target web --out-dir pkg --release
+
+      - name: Upload compiled package
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-snapper-wasm
+          path: pkg/
+          if-no-files-found: error
+          retention-days: 7
