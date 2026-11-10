@@ -1,0 +1,39 @@
+
+name: Build Pixel Snapper for Mac (Apple Silicon)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build macOS ARM64 executable
+    runs-on: macos-15
+
+    steps:
+      - name: Check out Pixel Snapper
+        uses: actions/checkout@v4
+        with:
+          repository: Hugo-Dz/spritefusion-pixel-snapper
+          ref: main
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build native executable
+        run: cargo build --release --bin spritefusion-pixel-snapper
+
+      - name: Package executable
+        run: |
+          mkdir -p dist
+          tar -czf dist/pixel-snapper-macos-arm64.tar.gz \
+            -C target/release spritefusion-pixel-snapper
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-snapper-macos-arm64
+          path: dist/pixel-snapper-macos-arm64.tar.gz
+          retention-days: 7
